@@ -1,0 +1,12 @@
+from setuptools import setup
+
+
+setup(
+    name="Hodor Python tester",
+    version="0.1",
+    description="Python (pytest) tester for Hodor",
+    install_requires=[
+        "pytest",
+        "pytest-json"
+    ]
+)
