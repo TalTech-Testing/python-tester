@@ -7,7 +7,7 @@ import sys
 from shutil import copy2, Error, copystat
 
 from hodorcommon.common import get_logger, get_source_list
-
+import xml.etree.ElementTree as ET
 
 def sh(cmd):
     """
@@ -100,6 +100,7 @@ def test(json_string):
         testfiles = copyfiles(testfrom, testpath)
 
         pytest_output_file = os.path.join(testroot, 'pytest_output.json')
+        pytest_output_xml = os.path.join(testroot, 'pytext_output.xml')
         resultfile = os.path.join(testroot, 'output.json')
 
         # DEBUG bljät
@@ -127,7 +128,7 @@ def test(json_string):
             results_count = 0
             results_passed = 0
             results_failed = 0
-            cmd = "timeout {} pytest --json={} {}".format(timeout, pytest_output_file, testfile)
+            cmd = "timeout {} pytest --json={} --junitxml={} {}".format(timeout, pytest_output_file, pytest_output_xml, testfile)
 
             (exitval, out, err, _) = sh(cmd)
             logger.debug("Executed: " + cmd)
@@ -156,20 +157,44 @@ def test(json_string):
                             tokens = testdata['name'].split('::')
                             if len(tokens) == 2:
                                 results_output += tokens[1] + ": " + testdata['outcome'] + "\n"
+                            if testdata['outcome'] == 'failed' and 'call' in testdata:
+                                if testdata['call']['outcome'] == 'failed':
+                                    failed_message = testdata['call']['longrepr']
+                                    logger.debug('Fail message:\n' + failed_message)
+                                    for line in failed_message.split('\n'):
+                                        if len(line) > 0 and line[0] == 'E':
+                                            results_output += "  " + line[1:]
 
 
-                results_output += "\n\nTotal number of tests: {}\n".format(results_count)
-                results_output += "Passed tests: {}\n".format(results_passed)
-                results_output += "Failed tests: {}\n".format(results_failed)
-                results_percent = 0
-                if results_count > 0:
-                    results_percent = results_passed / results_count
-                results_output += "\nPercentage: {:.2%}\n\n".format(results_percent)
-                results_list.append({'percent': results_percent, 'name': 'Grade_' + str(grade_number),
-                                     'code': str(grade_number), 'output': 'todo?',
-                                     'stdout': out, 'stderr': err})
-                results_total_count += results_count
-                results_total_passed += results_passed
+                if results_count == 0:
+                    results_output += "\nErrors in the code."
+                if results_count >= 0:
+                    results_output += "\n\nTotal number of tests: {}\n".format(results_count)
+                    results_output += "Passed tests: {}\n".format(results_passed)
+                    results_output += "Failed tests: {}\n".format(results_failed)
+                    results_percent = 0
+                    if results_count > 0:
+                        results_percent = results_passed / results_count
+                    results_output += "\nPercentage: {:.2%}\n\n".format(results_percent)
+                    results_list.append({'percent': results_percent, 'name': 'Grade_' + str(grade_number),
+                                         'code': str(grade_number), 'output': 'todo?',
+                                         'stdout': out, 'stderr': err})
+                    results_total_count += results_count
+                    results_total_passed += results_passed
+                else:
+                    # possible error, let's check xml output
+                    # as this mainly applies for test errors, no point to show those.
+                    tree = ET.parse(pytest_output_xml)
+                    root = tree.getroot()
+                    error_message = root[0][0].text
+                    """
+                    for line in error_message:
+                        if line[0] == 'E':
+                            # let's check only "E" lines
+                            pass
+                    """
+                    logger.debug('error message from XML:\n' + error_message)
+                    pass
                 grade_number += 1
 
             except:
