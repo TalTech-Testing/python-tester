@@ -116,6 +116,7 @@ def test(json_string):
         timeout = 60
         # sent to worker
         results_list = []
+        results_output = ""
 
         grade_number = 1
         results_total_count = 0
