@@ -176,7 +176,7 @@ def test(json_string):
                     if results_count > 0:
                         results_percent = results_passed / results_count
                     results_output += "\nPercentage: {:.2%}\n\n".format(results_percent)
-                    results_list.append({'percent': results_percent, 'name': 'Grade_' + str(grade_number),
+                    results_list.append({'percent': results_percent * 100, 'name': 'Grade_' + str(grade_number),
                                          'code': str(grade_number), 'output': 'todo?',
                                          'stdout': out, 'stderr': err})
                     results_total_count += results_count
