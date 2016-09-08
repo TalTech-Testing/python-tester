@@ -121,7 +121,7 @@ def test(json_string):
         results_total_count = 0
         results_total_passed = 0
 
-
+        exitval = 0
         for testfile in testfiles:
             if testfile[-3:] != '.py': continue # only py files
 
@@ -250,7 +250,7 @@ def test(json_string):
             logger.debug('result:' + str(result_json))
             return str(result_json)
     except:
-        logger.exception("Error while executing Java NG tester")
+        logger.exception("Error while executing python tester")
     return None
 
 
