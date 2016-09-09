@@ -7,6 +7,7 @@ setup(
     description="Python (pytest) tester for Hodor",
     install_requires=[
         "pytest",
-        "pytest-json"
+        "pytest-json",
+        "pytest-timeout"
     ]
 )
