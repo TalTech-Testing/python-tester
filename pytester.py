@@ -282,18 +282,20 @@ def test(json_string):
                             for testdata in pytest_data['report']['tests']:
                                 tokens = testdata['name'].split('::')
                                 if len(tokens) == 2:
-                                    results_output += tokens[1] + ": " + testdata['outcome'] + "\n"
+                                    results_output += "\n" + tokens[1] + ": " + testdata['outcome'] + "\n"
                                 if testdata['outcome'] == 'failed' and 'call' in testdata:
                                     if testdata['call']['outcome'] == 'failed':
                                         failed_message = testdata['call']['longrepr']
                                         logger.debug('Fail message:\n' + failed_message)
                                         for line in failed_message.split('\n'):
                                             if len(line) > 0 and line[0] == 'E':
+                                                # dont include assert errors
+                                                if 'assert' in line: break
                                                 results_output += "  " + line[1:]
 
 
                     if results_count == 0:
-                        results_output += "\nErrors in the code."
+                        results_output += "\nErrors in the code.\nCheck the file name, check the module/package name, check the function/method names."
                     if results_count >= 0:
                         results_output += "\n\nTotal number of tests: {}\n".format(results_count)
                         results_output += "Passed tests: {}\n".format(results_passed)
