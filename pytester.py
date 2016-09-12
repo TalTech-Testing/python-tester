@@ -226,7 +226,7 @@ def test(json_string):
                                 flake8_disabled = True
                                 logger.warning("noqa tag found in file!")
                     except:
-                        logger.error("Unable to open file for reading!")
+                        logger.exception("Unable to open file for reading!")
                         results_output = "Unable to open file for reading"
                     if flake8_disabled:
                         results_output += "\n\nStyle checker disabling directives found in source code! Please remove (noqa) and try again!\n\n"
