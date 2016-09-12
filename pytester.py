@@ -171,7 +171,10 @@ def test(json_string):
         for sourcefile in sourcefiles:
             if sourcefile[-3:] != '.py': continue # only py files
             cmd = "python3 -m py_compile " + sourcefile
+            logger.debug('cmd:' + cmd)
             (exitval, out, err, _) = sh(cmd)
+            logger.debug('output:' + str(out))
+            logger.debug('stderr:' + str(err))
             if len(err) > 0:
                 m_filename = re.finditer(r'File.*"(.*)"', err, re.MULTILINE)
                 if m_filename is not None:
