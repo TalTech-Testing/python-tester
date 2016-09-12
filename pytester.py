@@ -191,7 +191,7 @@ def test(json_string):
                           'source': source_list
                           }
                 is_error = True
-                with open(resultfile, 'w') as f:
+                with open(resultfile, 'w', encoding='utf-8') as f:
                     json.dump(result, f)
                 break
 
@@ -220,7 +220,7 @@ def test(json_string):
                         pep257_violation = True
                     # Check whether the code has codechecker disable commands
                     try:
-                        with open(sourcefile) as content_file:
+                        with open(sourcefile, 'r', encoding='utf-8') as content_file:
                             content = content_file.read()
                             if "# flake8: noqa" in content or "# noqa" in content:
                                 flake8_disabled = True
@@ -269,7 +269,7 @@ def test(json_string):
                 results_output += "Test: {}\n".format(testname)
                 try:
                     logger.debug('reading output file:' + pytest_output_file)
-                    pytest_data = json.load(open(pytest_output_file, 'r'))
+                    pytest_data = json.load(open(pytest_output_file, 'r', encoding='utf-8'))
                     logger.debug('contents:' + str(pytest_data))
                     if 'report' in pytest_data:
                         # "summary": {"duration": 0.036809444427490234, "num_tests": 3, "passed": 1, "failed": 2},
@@ -344,7 +344,7 @@ def test(json_string):
                     'output': 'Programmi testimiseks lubatud aeg on möödas. Sinu programm töötas liiga kaua ja ei andnud vastust. Proovi oma programmi parandada.\n\nSession:' + str(session),
                     'source':[]
                 }
-                with open(resultfile, 'w') as f:
+                with open(resultfile, 'w', encoding='utf-8') as f:
                     json.dump(d, f)
             else:
                 # no timeout
@@ -359,7 +359,7 @@ def test(json_string):
                     'source': source_list,
                     'extra': 'todo?'
                 }
-                with open(resultfile, 'w') as f:
+                with open(resultfile, 'w', encoding='utf-8') as f:
                     json.dump(d, f)
 
         # DEBUG bljät
@@ -371,7 +371,7 @@ def test(json_string):
         _, out, _, _ = sh(cmd)
         logger.debug('TREE . AFTER:\n' + str(out))
 
-        with open(resultfile, 'r') as f:
+        with open(resultfile, 'r', encoding='utf-8') as f:
             result_json = f.read()
             logger.debug('result:' + str(result_json))
             return str(result_json)
