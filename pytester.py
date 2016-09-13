@@ -73,7 +73,7 @@ def copyfiles(src, dst, ignore=None):
 
 def validate_flake8(filename):
     logger = get_logger()
-    cmd = "flake8 --statistics --ignore=E501 --max-complexity 10 " + filename
+    cmd = 'flake8 --statistics --ignore=E501 --max-complexity 10 "' + filename + '"'
     (exitval, out, err, p) = sh(cmd)
     flake8_violation = False
     if len(err) > 0 or len(out) > 0:
@@ -87,7 +87,7 @@ def validate_flake8(filename):
 
 def validate_pep257(filename):
     logger = get_logger()
-    cmd = "pep257 " + filename
+    cmd = 'pep257 "' + filename + '"'
     (exitval, out, err, p) = sh(cmd)
     pep257_violation = False
     if len(err) > 0 or len(out) > 0:
@@ -257,7 +257,7 @@ def test(json_string):
                 results_count = 0
                 results_passed = 0
                 results_failed = 0
-                cmd = "timeout {} pytest --json={} --junitxml={} {}".format(timeout, pytest_output_file, pytest_output_xml, testfile)
+                cmd = 'timeout {} pytest --json={} --junitxml={} "{}"'.format(timeout, pytest_output_file, pytest_output_xml, testfile)
 
                 (exitval, out, err, _) = sh(cmd)
                 logger.debug("Executed: " + cmd)
