@@ -167,6 +167,8 @@ def test(json_string):
 
         is_error = False # it True, skip the rest
 
+        # cd to testpath (to read files from test)
+        os.chdir(testpath)
         # let's check whether source compiles
         for sourcefile in sourcefiles:
             if sourcefile[-3:] != '.py': continue # only py files
