@@ -293,7 +293,7 @@ def test(json_string):
                                         failed_message = testdata['call']['longrepr']
                                         logger.debug('Fail message:\n' + failed_message)
                                         for line in failed_message.split('\n'):
-                                            if len(line) > 0 and line[0] == 'E':
+                                            if len(line) > 1 and line[0] == 'E' and line[1] in (' ', '\t'):
                                                 # dont include assert errors
                                                 if 'assert' in line: break
                                                 results_output += "  " + line[1:]
