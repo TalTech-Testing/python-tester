@@ -136,16 +136,6 @@ def test(json_string):
         pytest_output_xml = os.path.join(testroot, 'pytext_output.xml')
         resultfile = os.path.join(testroot, 'output.json')
 
-        # DEBUG bljät
-        cmd = "tree /host"
-        _, out, _, _ = sh(cmd)
-        logger.debug('TREE /host BEFORE:\n' + str(out))
-
-        cmd = "tree"
-        _, out, _, _ = sh(cmd)
-        logger.debug('TREE . BEFORE:\n' + str(out))
-
-
         timeout = 60
         # sent to worker
         results_list = []
@@ -363,15 +353,6 @@ def test(json_string):
                 }
                 with open(resultfile, 'w', encoding='utf-8') as f:
                     json.dump(d, f)
-
-        # DEBUG bljät
-        cmd = "tree /host"
-        _, out, _, _ = sh(cmd)
-        logger.debug('TREE /host AFTER:\n' + str(out))
-
-        cmd = "tree"
-        _, out, _, _ = sh(cmd)
-        logger.debug('TREE . AFTER:\n' + str(out))
 
         with open(resultfile, 'r', encoding='utf-8') as f:
             result_json = f.read()
