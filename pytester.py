@@ -245,6 +245,24 @@ def test(json_string):
             for testfile in testfiles:
                 if testfile[-3:] != '.py': continue # only py files
 
+                # try to check if the file is test file
+                correct = False
+                testfile_name = os.path.basename(testfile)
+                if 'test' in testfile_name:
+                    logger.debug('found test in filename {} (path: {})'.format(testfile_name, testfile))
+                    correct = True
+                if not correct:
+                    # let's check for pytest import
+                    with open(testfile, 'r') as f:
+                        contents = f.read()
+                        if re.search("import\s+pytest", contents):
+                            logger.debug('the file have import pytest in it')
+                            correct = True
+                if not correct:
+                    # not a pytest file
+                    logger.debug('no "test" in filename {} (path: {}) and no "import pytest" in file'.format(testfile_name, testfile))
+                    continue
+
 
                 results_count = 0
                 results_passed = 0
