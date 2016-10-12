@@ -365,7 +365,7 @@ def test(json_string):
                 d = {
                     'results': results_list,
                     'output': results_output,
-                    'percent': results_total_percent,
+                    'percent': results_total_percent * 100,
                     'source': source_list,
                     'extra': 'todo?'
                 }
