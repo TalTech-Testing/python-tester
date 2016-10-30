@@ -248,6 +248,8 @@ def test(json_string):
                 # try to check if the file is test file
                 correct = False
                 testfile_name = os.path.basename(testfile)
+                # conf file
+                if testfile_name == 'conftest.py': continue
                 if 'test' in testfile_name:
                     logger.debug('found test in filename {} (path: {})'.format(testfile_name, testfile))
                     correct = True
@@ -267,6 +269,7 @@ def test(json_string):
                 results_count = 0
                 results_passed = 0
                 results_failed = 0
+                results_skipped = 0
                 cmd = 'timeout {} pytest --json={} --junitxml={} "{}"'.format(timeout, pytest_output_file, pytest_output_xml, testfile)
 
                 (exitval, out, err, _) = sh(cmd)
@@ -291,6 +294,8 @@ def test(json_string):
                                 results_passed = summary_data['passed']
                             if 'failed' in summary_data:
                                 results_failed = summary_data['failed']
+                            if 'skipped' in summary_data:
+                                results_skipped = summary_data['skipped']
                         if 'tests' in pytest_data['report']:
                             for testdata in pytest_data['report']['tests']:
                                 tokens = testdata['name'].split('::')
@@ -313,6 +318,8 @@ def test(json_string):
                         results_output += "\n\nTotal number of tests: {}\n".format(results_count)
                         results_output += "Passed tests: {}\n".format(results_passed)
                         results_output += "Failed tests: {}\n".format(results_failed)
+                        if results_skipped > 0:
+                            results_output += "Skipped tests: {}\n".format(results_skipped)
                         results_percent = 0
                         if results_count > 0:
                             results_percent = results_passed / results_count
