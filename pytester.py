@@ -270,7 +270,7 @@ def test(json_string):
                 results_passed = 0
                 results_failed = 0
                 results_skipped = 0
-                cmd = 'timeout {} pytest --json={} --junitxml={} "{}"'.format(timeout, pytest_output_file, pytest_output_xml, testfile)
+                cmd = 'timeout {} pytest --json={} --junitxml={} --duration=10 "{}"'.format(timeout, pytest_output_file, pytest_output_xml, testfile)
 
                 (exitval, out, err, _) = sh(cmd)
                 logger.debug("Executed: " + cmd)
