@@ -241,7 +241,7 @@ def test(json_string):
 
         if not is_error and checkstyle_output:
             # checkstyle
-            results_output += checkstyle_result
+            results_output += checkstyle_output
             results_list.append(checkstyle_result)
 
         if not is_error:
