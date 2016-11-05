@@ -130,6 +130,58 @@ def test(json_string):
 
         # copy both contents and tests to testpath
         sourcefiles = copyfiles(sourcefrom, testpath)
+
+        # do checkstyle here, otherwise something may be overwriteen
+        checkstyle_output = ""
+        checkstyle_result = None
+        if 'stylecheck' in extra or 'checkstyle' in extra:
+            checkstyle_output += "Style conventions checker results:\n"
+            flake8_violation = False
+            pep257_violation = False
+            flake8_disabled = False
+            logger.info("Checking style!")
+            for sourcefile in sourcefiles:
+                logger.debug("Checking style for " + sourcefile)
+                if sourcefile[-3:] != '.py':
+                    logger.debug('Not a py-file')
+                    continue
+                logger.debug("Checking flake8!")
+                (flake8_feedback, violation) = validate_flake8(sourcefile)
+                checkstyle_output += flake8_feedback
+                if violation:
+                    flake8_violation = True
+                logger.debug("Checking pep257!")
+                (pep257_feedback, violation) = validate_pep257(sourcefile)
+                checkstyle_output += pep257_feedback
+                if violation:
+                    pep257_violation = True
+                # Check whether the code has codechecker disable commands
+                try:
+                    with open(sourcefile, 'r', encoding='utf-8') as content_file:
+                        content = content_file.read()
+                        if "# flake8: noqa" in content or "# noqa" in content:
+                            flake8_disabled = True
+                            logger.warning("noqa tag found in file!")
+                except:
+                    logger.exception("Unable to open file for reading!")
+                    checkstyle_output = "Unable to open file for reading"
+                if flake8_disabled:
+                    checkstyle_output += "\n\nStyle checker disabling directives found in source code! Please remove (noqa) and try again!\n\n"
+                else:
+                    if not flake8_violation:
+                        checkstyle_output += "Code conforms to PEP8 (coding style) guidelines! Good job!\n"
+                    if not pep257_violation:
+                        checkstyle_output += "Code conforms to PEP257 (docstring conventions) guidelines! Great work!\n"
+                        checkstyle_output += "\n"
+            # Add results to final results
+            logger.debug("Adding style results to array!")
+            if not flake8_violation and not pep257_violation and not flake8_disabled:
+                checkstyle_result = {'percent': 100.0, 'name': 'Stylecheck_1', 'code': 101,
+                     'output': 'Code conforms to style guidelines'}
+            else:
+                checkstyle_result = {'percent': 0.0, 'name': 'Stylecheck_1', 'code': 101,
+                     'output': 'Code does not conform to style guidelines'}
+
         testfiles = copyfiles(testfrom, testpath)
 
         pytest_output_file = os.path.join(testroot, 'pytest_output.json')
@@ -187,59 +239,10 @@ def test(json_string):
                     json.dump(result, f)
                 break
 
-        if not is_error:
+        if not is_error and checkstyle_output:
             # checkstyle
-            if 'stylecheck' in extra or 'checkstyle' in extra:
-                results_output += "Style conventions checker results:\n"
-                flake8_violation = False
-                pep257_violation = False
-                flake8_disabled = False
-                logger.info("Checking style!")
-                for sourcefile in sourcefiles:
-                    logger.debug("Checking style for " + sourcefile)
-                    if sourcefile[-3:] != '.py':
-                        logger.debug('Not a py-file')
-                        continue
-                    logger.debug("Checking flake8!")
-                    (flake8_feedback, violation) = validate_flake8(sourcefile)
-                    results_output += flake8_feedback
-                    if violation:
-                        flake8_violation = True
-                    logger.debug("Checking pep257!")
-                    (pep257_feedback, violation) = validate_pep257(sourcefile)
-                    results_output += pep257_feedback
-                    if violation:
-                        pep257_violation = True
-                    # Check whether the code has codechecker disable commands
-                    try:
-                        with open(sourcefile, 'r', encoding='utf-8') as content_file:
-                            content = content_file.read()
-                            if "# flake8: noqa" in content or "# noqa" in content:
-                                flake8_disabled = True
-                                logger.warning("noqa tag found in file!")
-                    except:
-                        logger.exception("Unable to open file for reading!")
-                        results_output = "Unable to open file for reading"
-                    if flake8_disabled:
-                        results_output += "\n\nStyle checker disabling directives found in source code! Please remove (noqa) and try again!\n\n"
-                    else:
-                        if not flake8_violation:
-                            results_output += "Code conforms to PEP8 (coding style) guidelines! Good job!\n"
-                        if not pep257_violation:
-                            results_output += "Code conforms to PEP257 (docstring conventions) guidelines! Great work!\n"
-                        results_output += "\n"
-                # Add results to final results
-                logger.debug("Adding style results to array!")
-                if not flake8_violation and not pep257_violation and not flake8_disabled:
-                    results_list.append(
-                        {'percent': 100.0, 'name': 'Stylecheck_1', 'code': 101,
-                         'output': 'Code conforms to style guidelines'})
-                else:
-                    results_list.append(
-                        {'percent': 0.0, 'name': 'Stylecheck_1', 'code': 101,
-                         'output': 'Code does not conform to style guidelines'})
-
-            pass
+            results_output += checkstyle_result
+            results_list.append(checkstyle_result)
 
         if not is_error:
             for testfile in testfiles:
