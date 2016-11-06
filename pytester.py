@@ -246,6 +246,7 @@ def test(json_string):
 
         if not is_error:
             for testfile in testfiles:
+                logger.debug('processing test file:' + str(testfile))
                 if testfile[-3:] != '.py': continue # only py files
 
                 # try to check if the file is test file
@@ -258,11 +259,19 @@ def test(json_string):
                     correct = True
                 if not correct:
                     # let's check for pytest import
-                    with open(testfile, 'r') as f:
-                        contents = f.read()
-                        if re.search("import\s+pytest", contents):
-                            logger.debug('the file have import pytest in it')
-                            correct = True
+                    try:
+                        with open(testfile, 'r') as f:
+                            contents = f.read()
+                            if re.search("import\s+pytest", contents):
+                                logger.debug('the file have import pytest in it')
+                                correct = True
+                    except UnicodeDecodeError:
+                        with open(testfile, 'r', encoding='utf-8') as f:
+                            contents = f.read()
+                            if re.search("import\s+pytest", contents):
+                                logger.debug('the file have import pytest in it')
+                                correct = True
+
                 if not correct:
                     # not a pytest file
                     logger.debug('no "test" in filename {} (path: {}) and no "import pytest" in file'.format(testfile_name, testfile))
