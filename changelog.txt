@@ -1,0 +1,2 @@
+2016-12-02:
+    - show the execution time of tests
