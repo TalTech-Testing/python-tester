@@ -116,6 +116,12 @@ def test(json_string):
     logger.debug('start now pytest')
     # debug for localhost
     logger.logger.addHandler(logging.StreamHandler())
+    """
+    what to show in email?
+    "normal" - default
+    "minimal" - just "received"
+    """
+    email_feedback = 'normal'
     try:
         sourcefrom = data['contentRoot']
         testfrom = data['testRoot']
@@ -131,7 +137,11 @@ def test(json_string):
         # copy both contents and tests to testpath
         sourcefiles = copyfiles(sourcefrom, testpath)
 
-        # do checkstyle here, otherwise something may be overwriteen
+        if 'minimal' in extra:
+            # minimal feedback
+            email_feedback = 'minimal'
+
+        # do checkstyle here, otherwise something may be overwritten
         checkstyle_output = ""
         checkstyle_result = None
         if 'stylecheck' in extra or 'checkstyle' in extra:
@@ -192,6 +202,7 @@ def test(json_string):
         # sent to worker
         results_list = []
         results_output = ""
+        extra_output = 'extra'
 
         grade_number = 1
         results_total_count = 0
@@ -397,12 +408,16 @@ def test(json_string):
                 if results_total_count > 0:
                     results_total_percent = results_total_passed / results_total_count
 
+                if email_feedback == 'minimal':
+                    # send email info to extra
+                    extra_output = results_output
+                    results_output = "Submission received"
                 d = {
                     'results': results_list,
                     'output': results_output,
                     'percent': results_total_percent * 100,
                     'source': source_list,
-                    'extra': 'todo?'
+                    'extra': extra_output
                 }
                 with open(resultfile, 'w', encoding='utf-8') as f:
                     json.dump(d, f)

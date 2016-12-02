@@ -1,2 +1,3 @@
 2016-12-02:
     - show the execution time of tests
+    - "minimal" feedback for exams (only "received")
