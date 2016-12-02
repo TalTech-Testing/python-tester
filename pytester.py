@@ -300,12 +300,12 @@ def test(json_string):
                             if 'skipped' in summary_data:
                                 results_skipped = summary_data['skipped']
                         if 'tests' in pytest_data['report']:
-                            # single test output
-                            test_name = ''
-                            test_result = ''
-                            test_duration = ''
-                            test_output = ''
                             for testdata in pytest_data['report']['tests']:
+                                # single test output
+                                test_name = ''
+                                test_result = ''
+                                test_duration = ''
+                                test_output = ''
                                 # duration
                                 if 'duration' in testdata:
                                     try:
@@ -334,10 +334,10 @@ def test(json_string):
                                                 if 'assert' in line: break
                                                 #results_output += "  " + line[1:]
                                                 test_output += "  " + line[1:]
-                            if test_name and test_result:
-                                if test_duration:
-                                    test_duration = ' ({})'.format(test_duration)
-                                results_output += "\n{}: {}{}\n".format(test_name, test_result, test_duration)
+                                if test_name and test_result:
+                                    if test_duration:
+                                        test_duration = ' ({})'.format(test_duration)
+                                    results_output += "\n{}: {}{}\n".format(test_name, test_result, test_duration)
 
 
                     if results_count == 0:
