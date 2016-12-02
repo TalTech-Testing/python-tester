@@ -116,6 +116,12 @@ def test(json_string):
     logger.debug('start now pytest')
     # debug for localhost
     logger.logger.addHandler(logging.StreamHandler())
+    """
+    what to show in email?
+    "normal" - default
+    "minimal" - just "received"
+    """
+    email_feedback = 'normal'
     try:
         sourcefrom = data['contentRoot']
         testfrom = data['testRoot']
@@ -131,7 +137,11 @@ def test(json_string):
         # copy both contents and tests to testpath
         sourcefiles = copyfiles(sourcefrom, testpath)
 
-        # do checkstyle here, otherwise something may be overwriteen
+        if 'minimal' in extra:
+            # minimal feedback
+            email_feedback = 'minimal'
+
+        # do checkstyle here, otherwise something may be overwritten
         checkstyle_output = ""
         checkstyle_result = None
         if 'stylecheck' in extra or 'checkstyle' in extra:
@@ -192,6 +202,7 @@ def test(json_string):
         # sent to worker
         results_list = []
         results_output = ""
+        extra_output = 'extra'
 
         grade_number = 1
         results_total_count = 0
@@ -310,9 +321,29 @@ def test(json_string):
                                 results_skipped = summary_data['skipped']
                         if 'tests' in pytest_data['report']:
                             for testdata in pytest_data['report']['tests']:
+                                # single test output
+                                test_name = ''
+                                test_result = ''
+                                test_duration = ''
+                                test_output = ''
+                                # duration
+                                if 'duration' in testdata:
+                                    try:
+                                        dur = float(testdata['duration'])
+                                        if dur < 1.0:
+                                            test_duration = "{:.4} ms".format(dur * 1000)
+                                        else:
+                                            test_duration = "{:.2} s".format(dur)
+
+                                    except:
+                                        pass
+
                                 tokens = testdata['name'].split('::')
+
                                 if len(tokens) == 2:
-                                    results_output += "\n" + tokens[1] + ": " + testdata['outcome'] + "\n"
+                                    test_name = tokens[1]
+                                    test_result = testdata['outcome']
+                                    #results_output += "\n" + tokens[1] + ": " + testdata['outcome'] + "\n"
                                 if testdata['outcome'] == 'failed' and 'call' in testdata:
                                     if testdata['call']['outcome'] == 'failed':
                                         failed_message = testdata['call']['longrepr']
@@ -321,7 +352,12 @@ def test(json_string):
                                             if len(line) > 1 and line[0] == 'E' and line[1] in (' ', '\t'):
                                                 # dont include assert errors
                                                 if 'assert' in line: break
-                                                results_output += "  " + line[1:]
+                                                #results_output += "  " + line[1:]
+                                                test_output += "  " + line[1:]
+                                if test_name and test_result:
+                                    if test_duration:
+                                        test_duration = ' ({})'.format(test_duration)
+                                    results_output += "\n{}: {}{}\n".format(test_name, test_result, test_duration)
 
 
                     if results_count == 0:
@@ -381,12 +417,16 @@ def test(json_string):
                 if results_total_count > 0:
                     results_total_percent = results_total_passed / results_total_count
 
+                if email_feedback == 'minimal':
+                    # send email info to extra
+                    extra_output = results_output
+                    results_output = "Submission received"
                 d = {
                     'results': results_list,
                     'output': results_output,
                     'percent': results_total_percent * 100,
                     'source': source_list,
-                    'extra': 'todo?'
+                    'extra': extra_output
                 }
                 with open(resultfile, 'w', encoding='utf-8') as f:
                     json.dump(d, f)
