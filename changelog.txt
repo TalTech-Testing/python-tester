@@ -1,3 +1,5 @@
 2016-12-02:
     - show the execution time of tests
     - "minimal" feedback for exams (only "received")
+2016-12-15:
+    - sort tests by run_index

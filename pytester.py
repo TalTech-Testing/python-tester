@@ -320,7 +320,32 @@ def test(json_string):
                             if 'skipped' in summary_data:
                                 results_skipped = summary_data['skipped']
                         if 'tests' in pytest_data['report']:
-                            for testdata in pytest_data['report']['tests']:
+                            """
+                             [{'name': 'bomber_tests.py::test_stronger_win[strong4]',
+                             'run_index': 19,
+                             'teardown': {'duration': 0.00027680397033691406, 'name': 'teardown', 'outcome': 'passed'},
+                             'duration': 0.0011937618255615234,
+                             'setup': {'duration': 0.00032448768615722656, 'name': 'setup', 'outcome': 'passed'},
+                             'outcome': 'failed', 'call': {'duration': 0.00026798248291015625, 'name': 'call', 'outcome': 'failed',
+                             'longrepr': "gameid = 'strong4'\n\n
+                             @pytest.mark.parametrize('gameid', ['strong' + str(x) for x in range(5)])\n
+                             def test_stronger_win(gameid):\n
+                             b1 = StrongerBomberman('W')\n
+                             b2 = StudentBomberman('S')\n
+                             result = _test_game(gameid, b1, b2)\n
+                             >       assert result == ['S']\n
+                             E       assert ['W'] == ['S']\n
+                             E         At index 0 diff: 'W' != 'S'\n
+                             E         Use -v to get the full diff\n\n
+                             bomber_tests.py:63: AssertionError"}}
+                            """
+                            # let's try to sort by run_index
+                            try:
+                                sorted_tests = sorted(pytest_data['report']['tests'], key=lambda x:x['run_index'])
+                            except:
+                                # fallback just in case
+                                sorted_tests = pytest_data['report']['tests']
+                            for testdata in sorted_tests:
                                 # single test output
                                 test_name = ''
                                 test_result = ''
