@@ -293,8 +293,12 @@ def test(json_string):
                 results_passed = 0
                 results_failed = 0
                 results_skipped = 0
-                # let's remove pytest out file so that the previous file won't be used in case the test fails due to timeout
-                os.remove(pytest_output_file)
+                try:
+                    # let's remove pytest out file so that the previous file won't be used in case the test fails due to timeout
+                    os.remove(pytest_output_file)
+                except OSError:
+                    pass
+                
                 cmd = 'timeout {} pytest --json={} --junitxml={} --duration=10 "{}"'.format(timeout, pytest_output_file, pytest_output_xml, testfile)
 
                 (exitval, out, err, _) = sh(cmd)
