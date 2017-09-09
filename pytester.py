@@ -145,7 +145,7 @@ def test(json_string):
         checkstyle_output = ""
         checkstyle_result = None
         if 'stylecheck' in extra or 'checkstyle' in extra:
-            checkstyle_output += "Style conventions checker results:\n"
+            checkstyle_output += "Style conventions checker results:\n\n"
             flake8_violation = False
             pep257_violation = False
             flake8_disabled = False
@@ -157,12 +157,12 @@ def test(json_string):
                     continue
                 logger.debug("Checking flake8!")
                 (flake8_feedback, violation) = validate_flake8(sourcefile)
-                checkstyle_output += flake8_feedback
+                checkstyle_output += "PEP8 stylecheck:\n" + flake8_feedback
                 if violation:
                     flake8_violation = True
                 logger.debug("Checking pep257!")
                 (pep257_feedback, violation) = validate_pep257(sourcefile)
-                checkstyle_output += pep257_feedback
+                checkstyle_output += "\nPEP257 stylecheck:\n" + pep257_feedback
                 if violation:
                     pep257_violation = True
                 # Check whether the code has codechecker disable commands
@@ -188,9 +188,11 @@ def test(json_string):
             if not flake8_violation and not pep257_violation and not flake8_disabled:
                 checkstyle_result = {'percent': 100.0, 'name': 'Stylecheck_1', 'code': 101,
                      'output': 'Code conforms to style guidelines'}
+                checkstyle_output += "Style percentage: 100%\n"
             else:
                 checkstyle_result = {'percent': 0.0, 'name': 'Stylecheck_1', 'code': 101,
                      'output': 'Code does not conform to style guidelines'}
+                checkstyle_output += "Style percentage: 0%\n"
 
         testfiles = copyfiles(testfrom, testpath)
 
@@ -252,7 +254,7 @@ def test(json_string):
 
         if not is_error and checkstyle_output:
             # checkstyle
-            results_output += checkstyle_output
+            results_output += checkstyle_output + "\n\n"
             results_list.append(checkstyle_result)
 
         if not is_error:
@@ -388,7 +390,8 @@ def test(json_string):
                                 if test_name and test_result:
                                     if test_duration:
                                         test_duration = ' ({})'.format(test_duration)
-                                    results_output += "\n{}: {}{}\n".format(test_name, test_result, test_duration)
+                                    if test_result == 'failed': test_result = 'FAILED'
+                                    results_output += "\n   {}: {}{}\n".format(test_name, test_result, test_duration)
 
 
                     if results_count == 0:
