@@ -295,6 +295,13 @@ def test(json_string):
                 results_passed = 0
                 results_failed = 0
                 results_skipped = 0
+                # for weighted tests
+                # whether different weights are used
+                has_different_weights = False
+                weight_count = 0
+                weight_passed = 0
+                weight_failed = 0
+                weight_skipped = 0
                 try:
                     # let's remove pytest out file so that the previous file won't be used in case the test fails due to timeout
                     os.remove(pytest_output_file)
@@ -370,6 +377,24 @@ def test(json_string):
 
                                     except:
                                         pass
+                                weight = 1
+                                if 'metadada' in testdata:
+                                    #  "metadata": [{"weight": 3}]
+                                    if isinstance(testdata['metadata'], list):
+                                        try:
+                                            weight = testdata['metadata'][0]['weight']
+                                            if weight != 1:
+                                                has_different_weights = True
+                                        except:
+                                            pass
+                                    weight_count += weight
+                                    if testdata['outcome'] == 'passed':
+                                        weight_passed += weight
+                                    if testdata['outcome'] == 'failed':
+                                        weight_failed += weight
+                                    if testdata['outcome'] == 'skipped':
+                                        weight_skipped += weight
+
 
                                 tokens = testdata['name'].split('::')
 
@@ -391,7 +416,10 @@ def test(json_string):
                                     if test_duration:
                                         test_duration = ' ({})'.format(test_duration)
                                     if test_result == 'failed': test_result = 'FAILED'
-                                    results_output += "\n   {}: {}{}\n".format(test_name, test_result, test_duration)
+                                    test_weight = ""
+                                    if weight != 1:
+                                        test_weight = " weight: {}".format(weight)
+                                    results_output += "\n   {}: {}{}{}\n".format(test_name, test_result, test_duration, test_weight)
 
 
                     if results_count == 0:
@@ -405,6 +433,19 @@ def test(json_string):
                         results_percent = 0
                         if results_count > 0:
                             results_percent = results_passed / results_count
+
+                        if has_different_weights:
+                            # show information about weighted test results
+                            results_output += "Passed tests weight: {}\n".format(weight_passed)
+                            results_output += "Failed tests weight: {}\n".format(weight_failed)
+                            if weight_skipped:
+                                results_output += "Skippe tests weight: {}\n".format(weight_skipped)
+                            if weight_count > 0:
+                                results_percent = weight_passed / weight_count
+                            # for total calculation
+                            results_count = weight_count
+                            results_passed = weight_passed
+
                         results_output += "\nPercentage: {:.2%}\n\n".format(results_percent)
                         results_list.append({'percent': results_percent * 100, 'name': 'Grade_' + str(grade_number),
                                              'code': str(grade_number), 'output': 'todo?',
