@@ -378,7 +378,7 @@ def test(json_string):
                                     except:
                                         pass
                                 weight = 1
-                                if 'metadada' in testdata:
+                                if 'metadata' in testdata:
                                     #  "metadata": [{"weight": 3}]
                                     if isinstance(testdata['metadata'], list):
                                         try:
