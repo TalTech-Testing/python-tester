@@ -387,13 +387,13 @@ def test(json_string):
                                                 has_different_weights = True
                                         except:
                                             pass
-                                    weight_count += weight
-                                    if testdata['outcome'] == 'passed':
-                                        weight_passed += weight
-                                    if testdata['outcome'] == 'failed':
-                                        weight_failed += weight
-                                    if testdata['outcome'] == 'skipped':
-                                        weight_skipped += weight
+                                weight_count += weight
+                                if testdata['outcome'] == 'passed':
+                                    weight_passed += weight
+                                if testdata['outcome'] == 'failed':
+                                    weight_failed += weight
+                                if testdata['outcome'] == 'skipped':
+                                    weight_skipped += weight
 
 
                                 tokens = testdata['name'].split('::')
