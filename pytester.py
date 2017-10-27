@@ -419,7 +419,10 @@ def test(json_string):
                                     test_weight = ""
                                     if weight != 1:
                                         test_weight = " weight: {}".format(weight)
-                                    results_output += "\n   {}: {}{}{}\n".format(test_name, test_result, test_duration, test_weight)
+
+                                    if test_output:
+                                        test_output = '   {}\n'.format(test_output)
+                                    results_output += "\n   {}: {}{}{}\n{}".format(test_name, test_result, test_duration, test_weight, test_output)
 
 
                     if results_count == 0:
