@@ -409,9 +409,9 @@ def test(json_string):
                                         for line in failed_message.split('\n'):
                                             if len(line) > 1 and line[0] == 'E' and line[1] in (' ', '\t'):
                                                 # dont include assert errors
-                                                if 'assert' in line: break
+                                                if 'assert' in line.lower(): break
                                                 #results_output += "  " + line[1:]
-                                                test_output += "  " + line[1:]
+                                                test_output += "  " + line[1:] + "\n"
                                 if test_name and test_result:
                                     if test_duration:
                                         test_duration = ' ({})'.format(test_duration)
