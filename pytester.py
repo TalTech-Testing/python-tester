@@ -308,7 +308,7 @@ def test(json_string):
                 except OSError:
                     pass
                 
-                cmd = 'timeout {} pytest --json={} --junitxml={} --duration=10 "{}"'.format(timeout, pytest_output_file, pytest_output_xml, testfile)
+                cmd = 'timeout {} pytest --json={} --junitxml={} --duration=10 --timeout_method=thread "{}"'.format(timeout, pytest_output_file, pytest_output_xml, testfile)
 
                 (exitval, out, err, _) = sh(cmd)
                 logger.debug("Executed: " + cmd)
@@ -442,7 +442,7 @@ def test(json_string):
                             results_output += "Passed tests weight: {}\n".format(weight_passed)
                             results_output += "Failed tests weight: {}\n".format(weight_failed)
                             if weight_skipped:
-                                results_output += "Skippe tests weight: {}\n".format(weight_skipped)
+                                results_output += "Skipped tests weight: {}\n".format(weight_skipped)
                             if weight_count > 0:
                                 results_percent = weight_passed / weight_count
                             # for total calculation
