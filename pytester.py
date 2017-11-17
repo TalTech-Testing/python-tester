@@ -308,7 +308,7 @@ def test(json_string):
                 except OSError:
                     pass
                 
-                cmd = 'timeout {} pytest --json={} --junitxml={} --duration=10 --timeout_method=thread "{}"'.format(timeout, pytest_output_file, pytest_output_xml, testfile)
+                cmd = 'timeout {} pytest --json={} --junitxml={} --duration=10 --timeout_method=signal "{}"'.format(timeout, pytest_output_file, pytest_output_xml, testfile)
 
                 (exitval, out, err, _) = sh(cmd)
                 logger.debug("Executed: " + cmd)
