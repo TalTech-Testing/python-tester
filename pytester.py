@@ -104,7 +104,11 @@ def test(json_string):
     data has:
     "contentRoot" - points to the folder where content (source) is stored
     "testRoot" - folder where the test files are stored
-    "extra" - additional information
+    "extra" - additional information:
+    
+      - minimal - show just "received" as feedback
+      - stylecheck - run stylecheck
+      - enable_socket - socket calls are enabled (disabled by default)
 
     All the files in contentRoot and testRoot should remain unchanged
     (that way it is possible to re-run the tester)
@@ -307,8 +311,15 @@ def test(json_string):
                     os.remove(pytest_output_file)
                 except OSError:
                     pass
+
+                # socket disabled?
+                disable_socket = '--disable-socket'
+                if 'enable_socket' in extra:
+                    logger.debug("SOCKET ENABLED!")
+                    disable_socket = ''
+
                 
-                cmd = 'timeout {} pytest --json={} --junitxml={} --duration=10 --timeout_method=signal "{}"'.format(timeout, pytest_output_file, pytest_output_xml, testfile)
+                cmd = 'timeout {} pytest --json={} --junitxml={} --duration=10 --timeout_method=signal {} "{}"'.format(timeout, pytest_output_file, pytest_output_xml, disable_socket, testfile)
 
                 (exitval, out, err, _) = sh(cmd)
                 logger.debug("Executed: " + cmd)

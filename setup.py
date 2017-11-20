@@ -8,6 +8,7 @@ setup(
     install_requires=[
         "pytest",
         "pytest-json",
-        "pytest-timeout"
+        "pytest-timeout",
+        "pytest-socket"
     ]
 )
