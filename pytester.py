@@ -244,12 +244,12 @@ def test(json_string):
                 stroutput = "Syntax error detected\n\n" + err
                 result = {'output': stroutput,
                           'extra': "",
-                          'results': [{'percent': 0.0, 'name': 'grade1',
-                                       'code': 1,
-                                       'output': stroutput}],
+                          'results': [{'percentage': 0.0, 'grade_type_code': 'Grade_1',
+                                       'output': stroutput,
+                                       'stdout': out, 'stderr': err}],
                           # [{'percent': 100.0, 'title': 'style', 'output': 'Code conforms to style guidelines'} ... }
                           'percent': 0,
-                          'source': source_list
+                          'files': source_list
                           }
                 is_error = True
                 with open(resultfile, 'w', encoding='utf-8') as f:
@@ -461,8 +461,8 @@ def test(json_string):
                             results_passed = weight_passed
 
                         results_output += "\nPercentage: {:.2%}\n\n".format(results_percent)
-                        results_list.append({'percent': results_percent * 100, 'name': 'Grade_' + str(grade_number),
-                                             'code': str(grade_number), 'output': 'todo?',
+                        results_list.append({'percentage': results_percent * 100, 'grade_type_code': 'Grade_' + str(grade_number),
+                                             'output': 'todo?',
                                              'stdout': out, 'stderr': err})
                         results_total_count += results_count
                         results_total_passed += results_passed
@@ -491,12 +491,12 @@ def test(json_string):
                 # timeout, let's build our own json
                 d = {
                     'results': [
-                        {'code': 1, 'percent': 0},
-                        {'code': 101, 'percent': 0}
+                        {'grade_type_code': 1, 'percentage': 0},
+                        {'grade_type_code': 101, 'percentage': 0}
                     ],
                     'percent': 0,
                     'output': 'Programmi testimiseks lubatud aeg on möödas. Sinu programm töötas liiga kaua ja ei andnud vastust. Proovi oma programmi parandada.\n\nSession:' + str(session),
-                    'source':[]
+                    'files':[]
                 }
                 with open(resultfile, 'w', encoding='utf-8') as f:
                     json.dump(d, f)
@@ -514,7 +514,7 @@ def test(json_string):
                     'results': results_list,
                     'output': results_output,
                     'percent': results_total_percent * 100,
-                    'source': source_list,
+                    'files': source_list,
                     'extra': extra_output
                 }
                 with open(resultfile, 'w', encoding='utf-8') as f:
