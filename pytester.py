@@ -190,11 +190,11 @@ def test(json_string):
             # Add results to final results
             logger.debug("Adding style results to array!")
             if not flake8_violation and not pep257_violation and not flake8_disabled:
-                checkstyle_result = {'percent': 100.0, 'name': 'Stylecheck_1', 'code': 101,
+                checkstyle_result = {'percentage': 100.0, 'grade_type_code': 101,
                      'output': 'Code conforms to style guidelines'}
                 checkstyle_output += "Style percentage: 100%\n"
             else:
-                checkstyle_result = {'percent': 0.0, 'name': 'Stylecheck_1', 'code': 101,
+                checkstyle_result = {'percentage': 0.0, 'grade_type_code': 101,
                      'output': 'Code does not conform to style guidelines'}
                 checkstyle_output += "Style percentage: 0%\n"
 
@@ -244,7 +244,7 @@ def test(json_string):
                 stroutput = "Syntax error detected\n\n" + err
                 result = {'output': stroutput,
                           'extra': "",
-                          'results': [{'percentage': 0.0, 'grade_type_code': 'Grade_1',
+                          'results': [{'percentage': 0.0, 'grade_type_code': 1,
                                        'output': stroutput,
                                        'stdout': out, 'stderr': err}],
                           # [{'percent': 100.0, 'title': 'style', 'output': 'Code conforms to style guidelines'} ... }
@@ -461,7 +461,7 @@ def test(json_string):
                             results_passed = weight_passed
 
                         results_output += "\nPercentage: {:.2%}\n\n".format(results_percent)
-                        results_list.append({'percentage': results_percent * 100, 'grade_type_code': 'Grade_' + str(grade_number),
+                        results_list.append({'percentage': results_percent * 100, 'grade_type_code': grade_number,
                                              'output': 'todo?',
                                              'stdout': out, 'stderr': err})
                         results_total_count += results_count
