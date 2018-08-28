@@ -231,7 +231,7 @@ def test(json_string):
         # let's check whether source compiles
         for sourcefile in sourcefiles:
             if sourcefile[-3:] != '.py': continue # only py files
-            cmd = 'python3.6 -m py_compile "' + sourcefile + '"'
+            cmd = 'python3.7 -m py_compile "' + sourcefile + '"'
             logger.debug('cmd:' + cmd)
             (exitval, out, err, _) = sh(cmd)
             logger.debug('output:' + str(out))
