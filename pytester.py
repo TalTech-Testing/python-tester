@@ -271,7 +271,8 @@ def test(json_string):
                 testfile_name = os.path.basename(testfile)
                 # conf file
                 if testfile_name == 'conftest.py': continue
-                if 'test' in testfile_name:
+                # hack for 2018 shortest_path folder
+                if 'test' in testfile_name and 'shortest' not in testfile_name:
                     logger.debug('found test in filename {} (path: {})'.format(testfile_name, testfile))
                     correct = True
                 if not correct:
