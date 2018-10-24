@@ -73,7 +73,7 @@ def copyfiles(src, dst, ignore=None):
 
 def validate_flake8(filename):
     logger = get_logger()
-    cmd = 'flake8 --statistics --ignore=E501 --max-complexity 10 "' + filename + '"'
+    cmd = 'flake8 --statistics --ignore=E501,W503 --disable-noqa --max-complexity 10 "' + filename + '"'
     (exitval, out, err, p) = sh(cmd)
     flake8_violation = False
     if len(err) > 0 or len(out) > 0:
