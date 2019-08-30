@@ -464,11 +464,18 @@ def test(json_string):
                                 # single test output
                                 test_name = ''
                                 test_result = ''
-                                test_duration = ''
+                                test_duration = 0
+                                test_duration_str = ''
                                 test_output = ''
                                 # duration
                                 if 'duration' in testdata:
                                     try:
+                                        dur = float(testdata['duration'])
+                                        if dur < 1.0:
+                                            test_duration_str = "{:.4} ms".format(dur * 1000)
+                                        else:
+                                            test_duration_str = "{:.2} s".format(dur)
+
                                         test_duration = int(1000 * float(testdata['duration']))
                                     except:
                                         pass
@@ -513,9 +520,11 @@ def test(json_string):
                                     if weight != 1:
                                         test_weight = " weight: {}".format(weight)
 
+                                    if test_duration_str:
+                                        test_duration_str = ' ({})'.format(test_duration_str)
                                     if test_output:
                                         test_output = '   {}\n'.format(test_output)
-                                    results_output += "\n   {}: {}{}{}\n{}".format(test_name, test_result, test_duration, test_weight, test_output)
+                                    results_output += "\n   {}: {}{}{}\n{}".format(test_name, test_result, test_duration_str, test_weight, test_output)
                                     test_list.append({'name': test_name,
                                                       'status': test_result.upper(),
                                                       'weight': weight,
