@@ -80,7 +80,7 @@ def get_source_list(project_dir,
                 path = fname.replace(project_dir + '/', '')
                 contents = f.read()
                 if path and contents:
-                    d = {'path': path, 'contents': contents}
+                    d = {'path': path, 'contents': contents, 'isTest': False}
                     lst.append(d)
     return lst
 
@@ -344,7 +344,7 @@ def test(json_string):
         # add compiler result
         results_list.append({"code": 102, "diagnosticList": [], "identifier": "COMPILER", "result": "SUCCESS"})
         # add files
-        results_list.append({"code": 103, "files": source_list, "identifier":"FILEWRITER","result":"SUCCESS"})
+        results_list.append({"code": 103, "files": source_list, "identifier": "FILEWRITER", "result": "SUCCESS"})
         # includes all the test files
         testfile_list = []
 
