@@ -344,7 +344,7 @@ def test(json_string):
         # add compiler result
         results_list.append({"code": 102, "diagnosticList": [], "identifier": "COMPILER", "result": "SUCCESS"})
         # add files
-        results_list.append({"code": 103, "files": source_list})
+        results_list.append({"code": 103, "files": source_list, "identifier":"FILEWRITER","result":"SUCCESS"})
         # includes all the test files
         testfile_list = []
 
