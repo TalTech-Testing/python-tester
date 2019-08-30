@@ -9,6 +9,10 @@ setup(
         "pytest",
         "pytest-json",
         "pytest-timeout",
-        "pytest-socket"
+        "pytest-socket",
+        "pep257",
+        "mock",
+        "pytest-console-scripts",
+        "flake8"
     ]
 )

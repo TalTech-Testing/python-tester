@@ -1,5 +1,6 @@
 import json
 import logging
+import logging.handlers
 import os
 import subprocess
 import sys
@@ -8,8 +9,81 @@ from shutil import copy2, Error, copystat
 
 import re
 
-from hodorcommon.common import get_logger, get_source_list
+VERSION = 2
+
+#from hodorcommon.common import get_logger, get_source_list
 import xml.etree.ElementTree as ET
+
+
+# from hodorcommon.common import get_logger
+
+# let's store log session key to be accessible for different get_logger calls
+log_session = None
+def get_logger(session=None, name='log', log_path=None):
+    """
+    Get the logger.
+    :param session: session key
+    :param name: filename
+    :param log_path: path, default /tmp
+    :return: logging.LoggerAdapter
+    """
+    global log_session
+    logger = logging.getLogger('logger_component')
+    # TODO: conf
+    logger.setLevel(logging.DEBUG)
+    if not logger.handlers:
+        if log_path is None:
+            log_path = os.path.join('/tmp', name + '.log')
+        os.makedirs(os.path.dirname(log_path), exist_ok=True)
+        #fh = logging.FileHandler(log_path)
+        # 100MB
+        fh = logging.handlers.RotatingFileHandler(log_path, maxBytes=100 * 1024 * 1024, backupCount=10)
+        fh.setLevel(logging.DEBUG)
+        formatter = logging.Formatter('%(levelname)s - %(asctime)s - %(session)s - %(message)s')
+        fh.setFormatter(formatter)
+        logger.addHandler(fh)
+        #lh = RPCLogHandler()
+        #logger.addHandler(lh)
+
+    extra = {}
+    if session is not None:
+        extra = {'session': session}
+        log_session = session
+    else:
+        if log_session is not None:
+            extra = {'session': log_session}
+        else:
+            # use some value for logger to exist
+            extra = {'session': 1}
+
+    adapter = logging.LoggerAdapter(logger, extra)
+    return adapter
+
+
+#from hodorcommon.common import get_source_list
+def get_source_list(project_dir,
+                    allowed_extensions=['java', 'txt', 'py', 'cpp', 'c', 'xml', 'html', 'xml', 'fxml', 'pl']):
+    """ Return list of source dicts in form [{'path':.., 'content':..},...] """
+    lst = []
+    for (root, dirnames, files) in os.walk(project_dir):
+        for filename in files:
+            # source.txt?
+            fname = os.path.join(root, filename)
+            fnamepart = os.path.splitext(fname)
+            ext = None
+            if len(fnamepart) > 1 and len(fnamepart[1]) > 1:
+                ext = fnamepart[1][1:].lower()
+            if ext not in allowed_extensions:
+                continue
+            with open(fname, 'r', encoding='utf-8') as f:
+
+                path = fname.replace(project_dir + '/', '')
+                contents = f.read()
+                if path and contents:
+                    d = {'path': path, 'contents': contents}
+                    lst.append(d)
+    return lst
+
 
 def sh(cmd):
     """
@@ -141,6 +215,9 @@ def test(json_string):
         # copy both contents and tests to testpath
         sourcefiles = copyfiles(sourcefrom, testpath)
 
+        # copy helpers
+        helperfiles = copyfiles("helpers", testpath)
+
         if 'minimal' in extra:
             # minimal feedback
             email_feedback = 'minimal'
@@ -261,6 +338,13 @@ def test(json_string):
             results_output += checkstyle_output + "\n\n"
             results_list.append(checkstyle_result)
 
+        # add compiler result
+        results_list.append({"code": 102, "diagnosticList": [], "identifier": "COMPILER", "result": "SUCCESS"})
+        # add files
+        results_list.append({"code": 103, "files": source_list})
+        # includes all the test files
+        testfile_list = []
+
         if not is_error:
             for testfile in testfiles:
                 logger.debug('processing test file:' + str(testfile))
@@ -295,6 +379,8 @@ def test(json_string):
                     logger.debug('no "test" in filename {} (path: {}) and no "import pytest" in file'.format(testfile_name, testfile))
                     continue
 
+                # new tester version accepts test separately
+                test_list = []
 
                 results_count = 0
                 results_passed = 0
@@ -319,8 +405,8 @@ def test(json_string):
                     logger.debug("SOCKET ENABLED!")
                     disable_socket = ''
 
-                
-                cmd = 'timeout {} pytest --json={} --junitxml={} --duration=10 --timeout_method=signal {} "{}"'.format(timeout, pytest_output_file, pytest_output_xml, disable_socket, testfile)
+                print("pwd", os.getcwd())
+                cmd = 'timeout {} pytest --json={} --junitxml={} --durations=10 --timeout_method=signal {} "{}"'.format(timeout, pytest_output_file, pytest_output_xml, disable_socket, testfile)
 
                 (exitval, out, err, _) = sh(cmd)
                 logger.debug("Executed: " + cmd)
@@ -435,6 +521,11 @@ def test(json_string):
                                     if test_output:
                                         test_output = '   {}\n'.format(test_output)
                                     results_output += "\n   {}: {}{}{}\n{}".format(test_name, test_result, test_duration, test_weight, test_output)
+                                    test_list.append({'name': test_name,
+                                                      'status': test_result.upper(),
+                                                      'weight': weight,
+                                                      'description': test_output,
+                                                      'timeElapsed': test_duration})
 
 
                     if results_count == 0:
@@ -462,9 +553,7 @@ def test(json_string):
                             results_passed = weight_passed
 
                         results_output += "\nPercentage: {:.2%}\n\n".format(results_percent)
-                        results_list.append({'percentage': results_percent * 100, 'grade_type_code': grade_number,
-                                             'output': 'todo?',
-                                             'stdout': out, 'stderr': err})
+
                         results_total_count += results_count
                         results_total_passed += results_passed
                     else:
@@ -481,12 +570,14 @@ def test(json_string):
                         """
                         logger.debug('error message from XML:\n' + error_message)
                         pass
+                    testfile_list.append({'name': str(testfile), 'file': str(testfile), 'count': results_count, 'passed_count': results_passed, 'unitTests': test_list})
                     grade_number += 1
 
                 except:
                     logger.exception("Error while parsing pytest output json")
                     pass
 
+            results_list.append({'code': 500, "identifier": "TESTNG", "result": "SUCCESS", 'testContexts': testfile_list})
 
             if int(exitval) > 123:
                 # timeout, let's build our own json
@@ -512,10 +603,11 @@ def test(json_string):
                     extra_output = results_output
                     results_output = "Submission received"
                 d = {
+                    "type": "hodor_studenttester",
                     'results': results_list,
-                    'output': results_output,
-                    'percent': results_total_percent * 100,
-                    'files': source_list,
+                    #'output': results_output,
+                    #'percent': results_total_percent * 100,
+                    #'files': source_list,
                     'extra': extra_output
                 }
                 with open(resultfile, 'w', encoding='utf-8') as f:
