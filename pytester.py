@@ -405,7 +405,6 @@ def test(json_string):
                     logger.debug("SOCKET ENABLED!")
                     disable_socket = ''
 
-                print("pwd", os.getcwd())
                 cmd = 'timeout {} pytest --json={} --junitxml={} --durations=10 --timeout_method=signal {} "{}"'.format(timeout, pytest_output_file, pytest_output_xml, disable_socket, testfile)
 
                 (exitval, out, err, _) = sh(cmd)
