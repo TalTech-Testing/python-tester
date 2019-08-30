@@ -582,7 +582,6 @@ def test(json_string):
                     logger.exception("Error while parsing pytest output json")
                     pass
 
-            results_list.append({'code': 500, "identifier": "TESTNG", "result": "SUCCESS", 'testContexts': testfile_list})
 
             if int(exitval) > 123:
                 # timeout, let's build our own json
@@ -608,6 +607,11 @@ def test(json_string):
                     extra_output = results_output
                     results_output = "Submission received"
 
+                results_list.append(
+                    {'code': 500, "identifier": "TESTNG", "result": "SUCCESS", 'testContexts': testfile_list,
+                     'totalGrade': results_total_percent,
+                     "totalCount": results_total_count,
+                     "totalPassedCount": results_total_passed})
                 # email text
                 results_list.append({"code": 2147483647, "identifier": "REPORT", "output": results_output,
                                      "result": "SUCCESS"})
