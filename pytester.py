@@ -267,14 +267,13 @@ def test(json_string):
             # Add results to final results
             logger.debug("Adding style results to array!")
             if not flake8_violation and not pep257_violation and not flake8_disabled:
-                checkstyle_result = {'count': 0, 'code': 101,
-                     'message': 'Code conforms to style guidelines',
+                checkstyle_result = {'count': 0, 'code': 101, "errors": [],
                                      "identifier": "CHECKSTYLE",
                                      "result": "SUCCESS"}
                 checkstyle_output += "Style percentage: 100%\n"
             else:
                 checkstyle_result = {'count': 1, 'code': 101,
-                     'message': 'Code does not conform to style guidelines',
+                                     'errors': [{'message': 'Code does not conform to style guidelines'}],
                                      "identifier": "CHECKSTYLE",
                                      "result": "SUCCESS"}
                 checkstyle_output += "Style percentage: 0%\n"
