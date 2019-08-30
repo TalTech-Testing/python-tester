@@ -469,12 +469,7 @@ def test(json_string):
                                 # duration
                                 if 'duration' in testdata:
                                     try:
-                                        dur = float(testdata['duration'])
-                                        if dur < 1.0:
-                                            test_duration = "{:.4} ms".format(dur * 1000)
-                                        else:
-                                            test_duration = "{:.2} s".format(dur)
-
+                                        test_duration = float(testdata['duration'])
                                     except:
                                         pass
                                 weight = 1
