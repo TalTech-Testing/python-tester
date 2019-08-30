@@ -598,6 +598,10 @@ def test(json_string):
                     # send email info to extra
                     extra_output = results_output
                     results_output = "Submission received"
+
+                # email text
+                results_list.append({"code": 2147483647, "identifier": "REPORT", "output": results_output,
+                                     "result": "SUCCESS"})
                 d = {
                     "type": "hodor_studenttester",
                     'results': results_list,
