@@ -28,7 +28,7 @@ RUN pip3 install requests
 # RUN pip3 install git+git://github.com/okken/pytest-requests.git@107ff7b8ed556d92294728a669183e9f640139e5
 
 #RUN mkdir /deps
-ADD py_tester /py_tester
+ADD . /py_tester
 
 # install package
 RUN cd /py_tester && python3.7 -m pip install .
