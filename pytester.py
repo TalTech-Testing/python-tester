@@ -469,7 +469,7 @@ def test(json_string):
                                 # duration
                                 if 'duration' in testdata:
                                     try:
-                                        test_duration = float(testdata['duration'])
+                                        test_duration = int(1000 * float(testdata['duration']))
                                     except:
                                         pass
                                 weight = 1
@@ -508,8 +508,6 @@ def test(json_string):
                                                 #results_output += "  " + line[1:]
                                                 test_output += "  " + line[1:] + "\n"
                                 if test_name and test_result:
-                                    if test_duration:
-                                        test_duration = ' ({})'.format(test_duration)
                                     if test_result == 'failed': test_result = 'FAILED'
                                     test_weight = ""
                                     if weight != 1:
