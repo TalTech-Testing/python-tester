@@ -575,7 +575,7 @@ def test(json_string):
                         logger.debug('error message from XML:\n' + error_message)
                         pass
                     testfile_list.append({'name': str(testfile), 'file': str(testfile), 'count': results_count, 'passedCount': results_passed, 'unitTests': test_list,
-                                          'identifier': grade_number, 'grade': results_percent})
+                                          'identifier': grade_number, 'grade': results_percent * 100})
                     grade_number += 1
 
                 except:
