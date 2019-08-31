@@ -609,7 +609,7 @@ def test(json_string):
 
                 results_list.append(
                     {'code': 500, "identifier": "TESTNG", "result": "SUCCESS", 'testContexts': testfile_list,
-                     'totalGrade': results_total_percent,
+                     'totalGrade': results_total_percent * 100,
                      "totalCount": results_total_count,
                      "totalPassedCount": results_total_passed})
                 # email text
