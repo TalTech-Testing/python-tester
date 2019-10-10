@@ -27,6 +27,14 @@ RUN pip3 install networkx
 RUN pip3 install requests
 # RUN pip3 install git+git://github.com/okken/pytest-requests.git@107ff7b8ed556d92294728a669183e9f640139e5
 
+# numpy
+RUN python3.7 -m pip install numpy
+
+# pytorch
+RUN pip3 install torch==1.2.0+cpu torchvision==0.4.0+cpu -f https://download.pytorch.org/whl/torch_stable.html
+RUN pip3 install torchvision
+
+
 #RUN mkdir /deps
 ADD . /py_tester
 
