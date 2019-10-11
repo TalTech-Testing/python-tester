@@ -30,6 +30,9 @@ RUN python3.7 -m pip install requests
 # numpy
 RUN python3.7 -m pip install numpy
 
+# matplotlib
+RUN python3.7 -m pip install matplotlib
+
 # pytorch
 RUN python3.7 -m pip install torch==1.2.0+cpu torchvision==0.4.0+cpu -f https://download.pytorch.org/whl/torch_stable.html
 RUN python3.7 -m pip install torchvision
