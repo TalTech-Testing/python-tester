@@ -285,6 +285,9 @@ def test(json_string):
         resultfile = os.path.join(testroot, 'output.json')
 
         timeout = 60
+        # TODO: fix: use concrete time from extra
+        if 'longtimeout' in extra:
+            timeout = 600
         # sent to worker
         results_list = []
         results_output = ""
