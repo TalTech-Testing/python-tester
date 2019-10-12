@@ -37,6 +37,8 @@ RUN python3.7 -m pip install matplotlib
 RUN python3.7 -m pip install torch==1.2.0+cpu torchvision==0.4.0+cpu -f https://download.pytorch.org/whl/torch_stable.html
 RUN python3.7 -m pip install torchvision
 
+# tensorflow
+RUN python3.7 -m pip install tensorflow
 
 #RUN mkdir /deps
 ADD . /py_tester
