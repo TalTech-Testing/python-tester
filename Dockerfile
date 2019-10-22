@@ -30,6 +30,9 @@ RUN python3.7 -m pip install requests
 # numpy
 RUN python3.7 -m pip install numpy
 
+#sympy
+RUN python3.7 -m pip install sympy
+
 # matplotlib
 RUN python3.7 -m pip install matplotlib
 
