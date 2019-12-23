@@ -1,4 +1,3 @@
-
 node('build_tester') {
   try {
     stage("Checkout repositories") {
@@ -6,7 +5,12 @@ node('build_tester') {
     }
 
     stage("Build docker container") {
-      sh(returnStdout: false, script: 'docker build -t hodor_python .')
+      if (env.BRANCH_NAME == 'master') {
+        name = 'hodor_python'
+      } else {
+        name = 'hodor_python_' + env.BRANCH_NAME
+      }
+      sh(returnStdout: false, script: 'docker build -t ' + name + ' .')
     }
 
     stage("Deployment") {
