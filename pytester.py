@@ -513,6 +513,7 @@ def test(json_string):
                                 test_duration = 0
                                 test_duration_str = ''
                                 test_output = ''
+                                test_class = ''
                                 # duration
                                 if 'duration' in testdata:
                                     try:
@@ -554,11 +555,14 @@ def test(json_string):
                                         failed_message = testdata['call']['longrepr']
                                         logger.debug('Fail message:\n' + failed_message)
                                         for line in failed_message.split('\n'):
-                                            if len(line) > 1 and line[0] == 'E' and line[1] in (' ', '\t'):
-                                                # dont include assert errors
-                                                if 'assert' in line.lower(): break
+                                            if len(line) > 1 and line[0] == 'E' and line[1] in (' ', '\t') and "Error: " in line:
+                                                # # dont include assert errors
+                                                # if 'assert' in line.lower(): break
                                                 # results_output += "  " + line[1:]
-                                                test_output += "  " + line[1:] + "\n"
+                                                test_class, test_output = line[1:].strip().split(": ")
+                                                if "assert" in line.lower():
+                                                    test_output = ""
+
                                 if test_name and test_result:
                                     if test_result == 'failed': test_result = 'FAILED'
                                     test_weight = ""
@@ -573,7 +577,9 @@ def test(json_string):
                                     test_list.append({'name': test_name,
                                                       'status': test_result.upper(),
                                                       'weight': weight,
-                                                      'description': test_output,
+                                                      'printExceptionMessage': test_result.upper() != "PASSED",
+                                                      'exceptionClass': test_class.strip(),
+                                                      'exceptionMessage': test_output.strip(),
                                                       'timeElapsed': test_duration})
 
                     if results_count == 0:
