@@ -10,7 +10,7 @@ node('build_tester') {
       } else {
         name = 'hodor_python_' + env.BRANCH_NAME
       }
-      sh(returnStdout: false, script: 'docker build -t ' + name + '.')
+      sh(returnStdout: false, script: 'docker build -t ' + name + ' .')
     }
 
     stage("Deployment") {
