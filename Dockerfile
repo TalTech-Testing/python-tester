@@ -43,13 +43,10 @@ RUN python3.7 -m pip install torchvision
 # tensorflow
 RUN python3.7 -m pip install tensorflow
 
-# pandas
-RUN python3.7 -m pip install pandas
-
 #RUN mkdir /deps
 ADD . /py_tester
 
 # install package
 RUN cd /py_tester && python3.7 -m pip install .
 
-CMD /bin/bash -c "cd /py_tester && timeout 100 python3.7 pytester.py < /host/input.json > /host/output.json && sleep 1"
+CMD /bin/bash -c "cd /py_tester && timeout 100 python3.7 pytester.py < /host/input.json > /host/output.json"
