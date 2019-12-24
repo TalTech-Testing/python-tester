@@ -43,6 +43,8 @@ RUN python3.7 -m pip install torchvision
 # tensorflow
 RUN python3.7 -m pip install tensorflow
 
+RUN python3.7 -m pip install pandas
+
 #RUN mkdir /deps
 ADD . /py_tester
 
