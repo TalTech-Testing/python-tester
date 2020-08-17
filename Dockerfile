@@ -5,8 +5,8 @@ RUN apt-get update
 RUN apt-get install -y tzdata
 RUN apt-get install -y software-properties-common
 
-RUN apt-get install -y wget git
-RUN apt install -y python3.7
+RUN apt-get install -y wget git python3-dev
+RUN apt install -y python3.7 libpython3.7-dev
 
 RUN apt-get install -y curl
 RUN apt install -y python3-pip
@@ -44,6 +44,9 @@ RUN python3.7 -m pip install torchvision
 RUN python3.7 -m pip install tensorflow
 
 RUN python3.7 -m pip install pandas
+
+# time
+RUN python3.7 -m pip install freezegun
 
 #RUN mkdir /deps
 ADD . /py_tester
