@@ -48,6 +48,9 @@ RUN python3.7 -m pip install pandas
 # time
 RUN python3.7 -m pip install freezegun
 
+# google api (pr13)
+RUN python3.7 -m pip install --upgrade google-api-python-client google-auth-httplib2 google-auth-oauthlib
+
 #RUN mkdir /deps
 ADD . /py_tester
 
