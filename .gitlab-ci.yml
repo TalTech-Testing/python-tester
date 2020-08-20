@@ -1,17 +1,10 @@
-variables:
-  DOCKER_DRIVER: overlay
-
-
 stages:
-  - deploy
+  - stage
 
 deploy:
   tags:
-    - docker
-  image: misterio92/ci-php-node:4.0
-  stage: test
-  services:
-    - name: docker:dind
+    - stage
+  stage: stage
   script:
     - docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
     - docker build -t automatedtestingservice/python-tester:latest .
@@ -19,5 +12,4 @@ deploy:
     - docker run --entrypoint "sh -c chmod +x mvnw && ./mvnw test" automatedtestingservice/arete:latest
     - docker push automatedtestingservice/python-tester:latest
   only:
-    - dev
     - master
