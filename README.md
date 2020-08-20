@@ -1,4 +1,4 @@
-### Python tester
+# Python tester
 
-# Architecture diagram
+### Architecture diagram
 ![flow](./Testeri_cicd.png)
