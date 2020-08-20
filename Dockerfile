@@ -3,6 +3,9 @@ FROM ubuntu:bionic
 LABEL Description="New python container"
 ENV TERM=xterm
 
+ENV TZ=Europe/Tallinn
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+
 RUN apt-get update
 RUN apt-get install -y tzdata software-properties-common wget git python3-dev curl python3-tk
 RUN apt-get install -y rsyslog && rsyslogd
