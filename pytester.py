@@ -2,23 +2,22 @@ import json
 import logging
 import logging.handlers
 import os
+import re
 import subprocess
 import sys
-
 from shutil import copy2, Error, copystat
-
-import re
 
 VERSION = 2
 
-#from hodorcommon.common import get_logger, get_source_list
+# from hodorcommon.common import get_logger, get_source_list
 import xml.etree.ElementTree as ET
-
 
 # from hodorcommon.common import get_logger
 
 # let's store log session key to be accessible for different get_logger calls
 log_session = None
+
+
 def get_logger(session=None, name='log', log_path=None):
     """
     Get the logger.
@@ -35,15 +34,15 @@ def get_logger(session=None, name='log', log_path=None):
         if log_path is None:
             log_path = os.path.join('/tmp', name + '.log')
         os.makedirs(os.path.dirname(log_path), exist_ok=True)
-        #fh = logging.FileHandler(log_path)
+        # fh = logging.FileHandler(log_path)
         # 100MB
         fh = logging.handlers.RotatingFileHandler(log_path, maxBytes=100 * 1024 * 1024, backupCount=10)
         fh.setLevel(logging.DEBUG)
         formatter = logging.Formatter('%(levelname)s - %(asctime)s - %(session)s - %(message)s')
         fh.setFormatter(formatter)
         logger.addHandler(fh)
-        #lh = RPCLogHandler()
-        #logger.addHandler(lh)
+        # lh = RPCLogHandler()
+        # logger.addHandler(lh)
 
     extra = {}
     if session is not None:
@@ -60,7 +59,7 @@ def get_logger(session=None, name='log', log_path=None):
     return adapter
 
 
-#from hodorcommon.common import get_source_list
+# from hodorcommon.common import get_source_list
 def get_source_list(project_dir,
                     allowed_extensions=['java', 'txt', 'py', 'cpp', 'c', 'xml', 'html', 'xml', 'fxml', 'pl']):
     """ Return list of source dicts in form [{'path':.., 'content':..},...] """
@@ -172,6 +171,7 @@ def validate_pep257(filename):
         pep257_violation = True
     return (err, pep257_violation)
 
+
 def test(json_string):
     data = json.loads(json_string)
     """
@@ -224,7 +224,9 @@ def test(json_string):
 
         # do checkstyle here, otherwise something may be overwritten
         checkstyle_output = ""
-        checkstyle_result = None
+        checkstyle_result = {'count': 0, 'code': 101, "errors": [],
+                             "identifier": "CHECKSTYLE",
+                             "result": "SUCCESS"}
         if 'stylecheck' in extra or 'checkstyle' in extra:
             checkstyle_output += "Style conventions checker results:\n\n"
             flake8_violation = False
@@ -239,12 +241,60 @@ def test(json_string):
                 logger.debug("Checking flake8!")
                 (flake8_feedback, violation) = validate_flake8(sourcefile)
                 checkstyle_output += "PEP8 stylecheck:\n" + flake8_feedback
-                if violation:
+                if violation and flake8_feedback != "":
+                    try:
+                        errors = flake8_feedback.split("\n")
+                        for error in errors:
+                            try:
+                                style_error = dict()
+                                style_error["fileName"] = sourcefile
+
+                                part = error.split()
+                                location = part[0].split(":")
+                                if len(location) >= 2:
+                                    style_error["lineNo"] = int(location[1])
+                                else:
+                                    continue
+                                if len(location) >= 3:
+                                    style_error["columnNo"] = int(location[2])
+
+                                style_error["message"] = error.split(": ")[-1].strip()
+                                style_error["kind"] = "style error"
+                                checkstyle_result["errors"].append(style_error)
+                                checkstyle_result["count"] += 1
+                            except:
+                                pass
+                    except:
+                        pass
                     flake8_violation = True
                 logger.debug("Checking pep257!")
                 (pep257_feedback, violation) = validate_pep257(sourcefile)
                 checkstyle_output += "\nPEP257 stylecheck:\n" + pep257_feedback
-                if violation:
+                if violation and pep257_feedback != "":
+                    try:
+                        errors = pep257_feedback.split("\n")
+                        for i, error in enumerate(errors):
+                            try:
+                                style_error = dict()
+                                style_error["fileName"] = sourcefile
+
+                                part = error.split()
+                                location = part[0].split(":")
+
+                                if len(location) >= 2 and location[1] != "":
+                                    style_error["lineNo"] = int(location[1])
+                                    style_error["columnNo"] = 0
+                                else:
+                                    continue
+
+                                style_error["message"] = errors[i + 1].strip()
+                                style_error["kind"] = "style error"
+                                checkstyle_result["errors"].append(style_error)
+                                checkstyle_result["count"] += 1
+                            except:
+                                pass
+                    except:
+                        pass
                     pep257_violation = True
                 # Check whether the code has codechecker disable commands
                 try:
@@ -267,15 +317,8 @@ def test(json_string):
             # Add results to final results
             logger.debug("Adding style results to array!")
             if not flake8_violation and not pep257_violation and not flake8_disabled:
-                checkstyle_result = {'count': 0, 'code': 101, "errors": [],
-                                     "identifier": "CHECKSTYLE",
-                                     "result": "SUCCESS"}
                 checkstyle_output += "Style percentage: 100%\n"
             else:
-                checkstyle_result = {'count': 1, 'code': 101,
-                                     'errors': [{'message': 'Code does not conform to style guidelines'}],
-                                     "identifier": "CHECKSTYLE",
-                                     "result": "SUCCESS"}
                 checkstyle_output += "Style percentage: 0%\n"
 
         testfiles = copyfiles(testfrom, testpath)
@@ -284,10 +327,7 @@ def test(json_string):
         pytest_output_xml = os.path.join(testroot, 'pytext_output.xml')
         resultfile = os.path.join(testroot, 'output.json')
 
-        timeout = 60
-        # TODO: fix: use concrete time from extra
-        if 'longtimeout' in extra:
-            timeout = 600
+        timeout = 5000
         # sent to worker
         results_list = []
         results_output = ""
@@ -307,37 +347,44 @@ def test(json_string):
         except:
             logger.exception("Error while getting source list")
 
-        is_error = False # it True, skip the rest
+        is_error = False  # it True, skip the rest
 
         # cd to testpath (to read files from test)
         os.chdir(testpath)
         # let's check whether source compiles
         for sourcefile in sourcefiles:
-            if sourcefile[-3:] != '.py': continue # only py files
+            if sourcefile[-3:] != '.py': continue  # only py files
             cmd = 'python3.7 -m py_compile "' + sourcefile + '"'
             logger.debug('cmd:' + cmd)
             (exitval, out, err, _) = sh(cmd)
             logger.debug('output:' + str(out))
             logger.debug('stderr:' + str(err))
             if len(err) > 0:
-                m_filename = re.finditer(r'File.*"(.*)"', err, re.MULTILINE)
-                if m_filename is not None:
-                    for fail in m_filename:
-                        err = err.replace(fail.group(1), "!?!?!?!")
-                stroutput = "Syntax error detected\n\n" + err
-                result = {'output': stroutput,
+                # m_filename = re.finditer(r'File.*"(.*)"', err, re.MULTILINE)
+                # if m_filename is not None:
+                #     for fail in m_filename:
+                #         err = err.replace(fail.group(1), "!?!?!?!")
+                try:
+                    line = re.search(r"line (\d+)", err).groups()[0]
+                except:
+                    line = 0
+                stroutput = "Syntax error detected: " + err
+
+                result = {"type": "hodor_studenttester",
                           'extra': "",
-                          'results': [{'percentage': 0.0, 'grade_type_code': 1,
-                                       'output': stroutput,
-                                       'stdout': out, 'stderr': err}],
+                          'results': [
+                              {
+                                  'diagnosticList': [{'kind': 'compilation error', 'message': stroutput, 'file': sourcefile, 'lineNo': line, 'columnNo': 0}],
+                                  'output': stroutput,
+                                  'files': source_list,
+                              }],
                           # [{'percent': 100.0, 'title': 'style', 'output': 'Code conforms to style guidelines'} ... }
-                          'percent': 0,
-                          'files': source_list
+
                           }
+
                 is_error = True
                 with open(resultfile, 'w', encoding='utf-8') as f:
                     json.dump(result, f)
-                break
 
         if not is_error and checkstyle_output:
             # checkstyle
@@ -354,7 +401,7 @@ def test(json_string):
         if not is_error:
             for testfile in testfiles:
                 logger.debug('processing test file:' + str(testfile))
-                if testfile[-3:] != '.py': continue # only py files
+                if testfile[-3:] != '.py': continue  # only py files
 
                 # try to check if the file is test file
                 correct = False
@@ -419,6 +466,7 @@ def test(json_string):
                 logger.debug("stdout: " + out)
                 logger.debug('return code:' + str(exitval))
                 # results_output = ""
+
                 testname = os.path.basename(testfile)
                 results_output += "Test: {}\n".format(testname)
                 try:
@@ -459,7 +507,7 @@ def test(json_string):
                             """
                             # let's try to sort by run_index
                             try:
-                                sorted_tests = sorted(pytest_data['report']['tests'], key=lambda x:x['run_index'])
+                                sorted_tests = sorted(pytest_data['report']['tests'], key=lambda x: x['run_index'])
                             except:
                                 # fallback just in case
                                 sorted_tests = pytest_data['report']['tests']
@@ -470,6 +518,7 @@ def test(json_string):
                                 test_duration = 0
                                 test_duration_str = ''
                                 test_output = ''
+                                test_class = ''
                                 # duration
                                 if 'duration' in testdata:
                                     try:
@@ -500,25 +549,41 @@ def test(json_string):
                                 if testdata['outcome'] == 'skipped':
                                     weight_skipped += weight
 
-
                                 tokens = testdata['name'].split('::')
 
                                 if len(tokens) == 2:
                                     test_name = tokens[1]
                                     test_result = testdata['outcome']
-                                    #results_output += "\n" + tokens[1] + ": " + testdata['outcome'] + "\n"
+                                    # results_output += "\n" + tokens[1] + ": " + testdata['outcome'] + "\n"
                                 if testdata['outcome'] == 'failed' and 'call' in testdata:
                                     if testdata['call']['outcome'] == 'failed':
                                         failed_message = testdata['call']['longrepr']
                                         logger.debug('Fail message:\n' + failed_message)
-                                        for line in failed_message.split('\n'):
-                                            if len(line) > 1 and line[0] == 'E' and line[1] in (' ', '\t'):
-                                                # dont include assert errors
-                                                if 'assert' in line.lower(): break
-                                                #results_output += "  " + line[1:]
-                                                test_output += "  " + line[1:] + "\n"
+
+                                        try:
+                                            if "AssertionError" in failed_message:
+                                                test_class = "AssertionError"
+                                                test_output = ""
+
+                                                for line in failed_message.split('\n'):
+                                                    if len(line) > 1 and line[0] == '>' and line[1] in (' ', '\t'):
+                                                        test_output = line[1:].strip()
+                                                        break
+
+                                            else:
+                                                for line in failed_message.split('\n'):
+                                                    if len(line) > 1 and line[0] == 'E' and line[1] in (' ', '\t') and ": " in line:
+                                                        # # dont include assert errors
+                                                        # if 'assert' in line.lower(): break
+                                                        # results_output += "  " + line[1:]
+                                                        test_class, test_output = line[1:].strip().split(": ", 1)
+                                                        break
+                                        except:
+                                            pass
+
                                 if test_name and test_result:
-                                    if test_result == 'failed': test_result = 'FAILED'
+                                    if test_result == 'failed':
+                                        test_result = 'FAILED'
                                     test_weight = ""
                                     if weight != 1:
                                         test_weight = " weight: {}".format(weight)
@@ -531,11 +596,22 @@ def test(json_string):
                                     test_list.append({'name': test_name,
                                                       'status': test_result.upper(),
                                                       'weight': weight,
-                                                      'description': test_output,
+                                                      'printExceptionMessage': test_result.upper() != "PASSED",
+                                                      'exceptionClass': test_class.strip(),
+                                                      'exceptionMessage': test_output.strip(),
                                                       'timeElapsed': test_duration})
 
-
                     if results_count == 0:
+
+                        test_list.append({'name': "No results",
+                                          'status': "FAILED",
+                                          'weight': 0,
+                                          'printExceptionMessage': True,
+                                          'exceptionClass': "INTERNALERROR",
+                                          'exceptionMessage': "Errors in the code. Check the file name, check the module/package name, check the function/method names.",
+                                          'timeElapsed': -1})
+
+
                         results_output += "\nErrors in the code.\nCheck the file name, check the module/package name, check the function/method names."
                     if results_count >= 0:
                         results_output += "\n\nTotal number of tests: {}\n".format(results_count)
@@ -583,8 +659,17 @@ def test(json_string):
 
                 except:
                     logger.exception("Error while parsing pytest output json")
-                    pass
-
+                    test_list.append({'name': "Some unknown test that resulted in the system failing",
+                                      'status': "FAILED",
+                                      'weight': 0,
+                                      'printExceptionMessage': True,
+                                      'exceptionClass': "INTERNALERROR",
+                                      'exceptionMessage': "No tests or system failure. Most probable cause is timeout with recursion",
+                                      'timeElapsed': -1})
+                    testfile_list.append({
+                        'name': testfile,
+                        'file': testfile,
+                        'unitTests': test_list})
 
             if int(exitval) > 123:
                 # timeout, let's build our own json
@@ -595,7 +680,7 @@ def test(json_string):
                     ],
                     'percent': 0,
                     'output': 'Programmi testimiseks lubatud aeg on möödas. Sinu programm töötas liiga kaua ja ei andnud vastust. Proovi oma programmi parandada.\n\nSession:' + str(session),
-                    'files':[]
+                    'files': []
                 }
                 with open(resultfile, 'w', encoding='utf-8') as f:
                     json.dump(d, f)
@@ -621,9 +706,9 @@ def test(json_string):
                 d = {
                     "type": "hodor_studenttester",
                     'results': results_list,
-                    #'output': results_output,
-                    #'percent': results_total_percent * 100,
-                    #'files': source_list,
+                    # 'output': results_output,
+                    # 'percent': results_total_percent * 100,
+                    # 'files': source_list,
                     'extra': extra_output
                 }
                 with open(resultfile, 'w', encoding='utf-8') as f:
@@ -640,5 +725,6 @@ def test(json_string):
 
 if __name__ == '__main__':
     json_string = "".join(sys.stdin)
+    # json_string = '{"contentRoot":"test", "testRoot":"test", "extra":"stylecheck"}'
     result = test(json_string)
     print(result)
