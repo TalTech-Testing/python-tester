@@ -4,7 +4,8 @@ LABEL Description="New python container"
 ENV TERM=xterm
 
 RUN apt-get update
-RUN apt-get install -y tzdata software-properties-common wget git python3-dev python3.7 libpython3.7-dev curl python3-pip rsyslog rsyslogd python3-tk
+RUN apt-get install -y tzdata software-properties-common wget git python3-dev python3.7 libpython3.7-dev curl python3-pip rsyslog python3-tk
+RUN apt install -y rsyslogd
 
 RUN python3.7 -m pip install --default-timeout=100 pytest pep257 mock pytest-console-scripts flake8 Pillow networkx requests numpy sympy matplotlib torchvision tensorflow pandas freezegun
 RUN python3.7 -m pip install --default-timeout=100 torch==1.2.0+cpu torchvision==0.4.0+cpu -f https://download.pytorch.org/whl/torch_stable.html
