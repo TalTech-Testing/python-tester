@@ -1,3 +1,12 @@
 FROM automatedtestingservice/arete:latest
 
+ARG ARETE_HOME
+ENV ARETE_HOME=$ARETE_HOME
+
+ARG GIT_USERNAME
+ENV GIT_USERNAME=$GIT_USERNAME
+
+ARG GIT_PASSWORD
+ENV GIT_PASSWORD=$GIT_PASSWORD
+
 ENTRYPOINT [ "sh", "-c", "chmod +x mvnw && ./mvnw test" ]
