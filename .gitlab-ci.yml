@@ -9,7 +9,7 @@ deploy:
     - docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
     - docker build -t automatedtestingservice/python-tester:latest .
     - docker pull automatedtestingservice/arete:latest
-    - docker-compose -f docker-compose-tests.yml up --build --force-recreate --no-deps
+    - docker-compose -f docker-compose-tests.yml up --build --force-recreate --no-deps --abort-on-container-exit
     - docker push automatedtestingservice/python-tester:latest
   only:
     - master
