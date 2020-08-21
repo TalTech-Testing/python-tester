@@ -4,6 +4,7 @@ services:
 
   testing_service-test:
     privileged: true
+    network_mode: "host"
     build:
       args:
         - ARETE_HOME=${ARETE_HOME}/arete-test
