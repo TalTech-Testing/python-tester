@@ -11,6 +11,6 @@ deploy:
     - docker pull automatedtestingservice/arete:latest
     - docker-compose -f docker-compose-tests.yml up --build --force-recreate --no-deps --abort-on-container-exit
     - docker push automatedtestingservice/python-tester:latest
-    - curl -X POST "https://cs.ttu.ee/services/arete/api/v2/course/python-tester" -H "accept: */*" -H "X-Docker-Token: $ARETE_TOKEN"
+    - curl -X POST "https://cs.ttu.ee/services/arete/api/v2/course/python-tester" -H "X-Docker-Token: python-tester $ARETE_TOKEN"
   only:
     - master
