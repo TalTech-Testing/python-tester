@@ -6,6 +6,7 @@ deploy:
     - ained
   stage: stage
   script:
+    - sudo apt install -y gnupg2 pass
     - docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
     - docker build -t automatedtestingservice/python-tester:latest .
     - docker pull automatedtestingservice/arete:latest
