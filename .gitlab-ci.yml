@@ -3,7 +3,7 @@ stages:
 
 deploy:
   tags:
-    - stage
+    - ained
   stage: stage
   script:
     - docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
