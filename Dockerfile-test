@@ -9,6 +9,6 @@ ENV GIT_USERNAME=$GIT_USERNAME
 ARG GIT_PASSWORD
 ENV GIT_PASSWORD=$GIT_PASSWORD
 
-ENTRYPOINT [ "sh", "-c", "service postfix start && chmod +x mvnw && ./mvnw test" ]
+ENTRYPOINT [ "sh", "-c", "service postfix start && chmod +x mvnw && ./mvnw -Dtest=SubmissionControllerTest test" ]
 
 EXPOSE 8098:8098
