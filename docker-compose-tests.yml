@@ -10,7 +10,7 @@ services:
         - GIT_PASSWORD=${GITLAB_PASSWORD}
         - GIT_USERNAME=envomp
       dockerfile:
-        Dockerfile-ubuntu-test
+        Dockerfile-test
       context: .
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
