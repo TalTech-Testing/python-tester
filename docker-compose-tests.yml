@@ -1,0 +1,3 @@
+FROM automatedtestingservice/arete:latest
+
+ENTRYPOINT [ "sh", "-c", "chmod +x mvnw && ./mvnw test" ]
