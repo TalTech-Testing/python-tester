@@ -9,6 +9,9 @@ ENV GIT_USERNAME=$GIT_USERNAME
 ARG GIT_PASSWORD
 ENV GIT_PASSWORD=$GIT_PASSWORD
 
+ARG BACKEND_URL
+ENV BACKEND_URL=$BACKEND_URL
+
 # Ignore LFS
 RUN git config --global filter.lfs.smudge "git-lfs smudge --skip"
 
