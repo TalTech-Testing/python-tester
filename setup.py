@@ -10,6 +10,7 @@ setup(
         "pytest-json",
         "pytest-timeout",
         "pytest-socket",
+        "pytest-dependency",
         "pep257",
         "mock",
         "pytest-console-scripts",
