@@ -14,6 +14,7 @@ setup(
         "pep257",
         "mock",
         "pytest-console-scripts",
-        "flake8"
+        "flake8",
+        "freezegun"
     ]
 )
